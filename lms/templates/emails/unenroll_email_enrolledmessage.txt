@@ -1,0 +1,5 @@
+The instructor has un-enrolled you from course ${course_id}
+
+Your other courses have not been affected.
+
+Sent to you by ${site_name}

@@ -1,0 +1,5 @@
+The instructor has un-enrolled you from the course ${course_id}
+
+This is a course that you have not yet accessed.
+
+Sent to you by ${site_name}

@@ -1,0 +1,6 @@
+The instructor has enrolled you in course ${course_id}
+
+You will be able to see this course the next time you login to ${site_name}
+url
+
+Sent to you by ${site_name}

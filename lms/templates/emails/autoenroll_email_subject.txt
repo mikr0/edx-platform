@@ -1,0 +1,1 @@
+You have been enrolled by the instructor in ${course_id}

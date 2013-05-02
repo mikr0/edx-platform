@@ -1,0 +1,6 @@
+The instructor has enrolled you in course ${course_id}
+
+Please signup at ${site_name} to access this course.
+put in url
+
+Sent to you by ${site_name}
