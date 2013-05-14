@@ -1,6 +1,8 @@
-The instructor has enrolled you in course ${course_id}
+Dear ${first_name} ${last_name}
 
-You will be able to see this course the next time you login to ${site_name}
-url
+You have been enrolled in ${course_id} at ${site_name} by a member of the course staff. The course should now appear on your ${site_name} dashboard.
 
-Sent to you by ${site_name}
+To start accessing course materials, please visit ${course_url}
+
+----
+This email was automatically sent from ${site_name} to ${first_name} ${last_name}

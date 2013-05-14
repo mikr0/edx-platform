@@ -1,6 +1,13 @@
-The instructor has enrolled you in course ${course_id}
+Dear student,
 
-Please signup at ${site_name} to access this course.
-put in url
+You have been invited to join ${course_id} at ${site_name} by a member of the course staff.
 
-Sent to you by ${site_name}
+To finish your registration, please visit ${registration_url} and fill out the registration form.
+% if auto_enroll:
+Once you have registered and activated your account, you will see ${course_id} listed on your dashboard.
+% else:
+Once you have registered and activated your account, visit ${course_url} to join the course.
+% endif
+
+----
+This email was automatically sent from ${site_name} to ${email_address}

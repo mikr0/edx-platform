@@ -1,5 +1,6 @@
-The instructor has un-enrolled you from the course ${course_id}
+Dear Student,
 
-This is a course that you have not yet accessed.
+You have been un-enrolled from course ${course_id} by a member of the course staff. Please disregard the invitation previously sent.
 
-Sent to you by ${site_name}
+----
+This email was automatically sent from ${site_name} to ${email_address}
