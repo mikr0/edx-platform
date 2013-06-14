@@ -22,6 +22,7 @@ from django_future.csrf import ensure_csrf_cookie
 from django.views.decorators.cache import cache_control
 from mitxmako.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
+from django.core.mail import send_mail
 
 from courseware import grades
 from courseware.access import (has_access, get_access_group_name,
@@ -38,7 +39,6 @@ from student.models import CourseEnrollment, CourseEnrollmentAllowed
 from xmodule.modulestore.django import modulestore
 import xmodule.graders as xmgraders
 import track.views
-from django.core.mail import send_mail
 from mitxmako.shortcuts import render_to_string
 
 from .offline_gradecalc import student_grades, offline_grades_available
@@ -993,7 +993,6 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
         subject = render_to_string('emails/autoenroll_email_subject.txt', d)
         # Email subject *must not* contain newlines
         subject = ''.join(subject.splitlines())
-
         allowed_message = render_to_string('emails/autoenroll_email_allowedmessage.txt', d)
         enrolled_message = render_to_string('emails/autoenroll_email_enrolledmessage.txt', d)
 
@@ -1002,7 +1001,7 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
             user = User.objects.get(email=student)
         except User.DoesNotExist:
 
-            #User not signed up yet, put in pending enrollment allowed table
+            #Student not signed up yet, put in pending enrollment allowed table
             cea = CourseEnrollmentAllowed.objects.filter(email=student, course_id=course_id)
 
             #If enrollmentallowed already exists, update auto_enroll flag to however it was set in UI
@@ -1013,20 +1012,25 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
                 status[student] = 'user does not exist, enrollment already allowed, pending with auto enrollment ' \
                     + ('on' if auto_enroll else 'off')
                 continue
+
+            #EnrollmentAllowed doesn't exist so create it
             cea = CourseEnrollmentAllowed(email=student, course_id=course_id, auto_enroll=auto_enroll)
             cea.save()
 
             status[student] = 'user does not exist, enrollment allowed, pending with auto enrollment ' + ('on' if auto_enroll else 'off') + (', email sent' if email_students else '')
 
             if email_students:
-                #User is allowed to enroll but has not signed up yet
+                #User is allowed to enroll but has not registered yet
                 send_mail(subject, allowed_message, settings.DEFAULT_FROM_EMAIL, [student], fail_silently=False)
             continue
 
+        #Student has already registered
         if CourseEnrollment.objects.filter(user=user, course_id=course_id):
             status[student] = 'already enrolled'
             continue
+
         try:
+            #Not enrolled yet
             ce = CourseEnrollment(user=user, course_id=course_id)
             ce.save()
             status[student] = 'added' + (', email sent' if email_students else '')
