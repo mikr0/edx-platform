@@ -16,3 +16,4 @@ Changes
 Upcoming
 --------
 * Created changelog
+* FIx: Broken documentation generation. Adds test for documentation generation.
