@@ -986,8 +986,8 @@ def _do_enroll_students(course, course_id, students, request, overload=False, au
         ceaset.delete()
 
     if email_students:
-        
-        # @todo Figure out how to get the base url 
+
+        # @todo Figure out how to get the base url
         registration_url = 'https://' + str(request.META.get('HTTP_HOST')) + reverse('student.views.register_user')
         #Compose email
         d = {'site_name': settings.SITE_NAME,
@@ -996,7 +996,7 @@ def _do_enroll_students(course, course_id, students, request, overload=False, au
              'auto_enroll': auto_enroll,
              'course_url': registration_url + '/courses/' + course_id,
              }
-        
+
         allowed_subject = render_to_string('emails/enroll_email_allowedsubject.txt', d)
         enrolled_subject = render_to_string('emails/enroll_email_enrolledsubject.txt', d)
         # Email subject *must not* contain newlines
@@ -1025,7 +1025,7 @@ def _do_enroll_students(course, course_id, students, request, overload=False, au
             cea.save()
 
             status[student] = 'user does not exist, enrollment allowed, pending with auto enrollment ' \
-                    + ('on' if auto_enroll else 'off') + (', email sent' if email_students else '')
+                + ('on' if auto_enroll else 'off') + (', email sent' if email_students else '')
 
             if email_students:
                 #User is allowed to enroll but has not signed up yet

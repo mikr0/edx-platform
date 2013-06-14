@@ -16,6 +16,7 @@ from django.core import mail
 
 USER_COUNT = 4
 
+
 @override_settings(MODULESTORE=TEST_DATA_MONGO_MODULESTORE)
 class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase):
     '''
@@ -32,11 +33,10 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
         self.users = [
             UserFactory.create(username="student%d" % i, email="student%d@test.com" % i)
             for i in xrange(USER_COUNT)
-            ]
+        ]
 
         for user in self.users:
             CourseEnrollmentFactory.create(user=user, course_id=self.course.id)
-
 
     def test_unenrollment_email_off(self):
         '''
@@ -48,7 +48,7 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
 
         course = self.course
 
-        #Run the Un-enroll students command 
+        #Run the Un-enroll students command
         url = reverse('instructor_dashboard', kwargs={'course_id': course.id})
         response = self.client.post(url, {'action': 'Unenroll multiple students', 'multiple_students': 'student0@test.com student1@test.com'})
 
@@ -69,7 +69,6 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
         #Check the outbox
         self.assertEqual(len(mail.outbox), 0)
 
-
     def test_enrollment_new_student_autoenroll_on_email_off(self):
         '''
         Do auto-enroll on, email off test
@@ -77,10 +76,10 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
 
         #Empty the test outbox
         mail.outbox = []
-  
+
         course = self.course
 
-        #Run the Enroll students command      
+        #Run the Enroll students command
         url = reverse('instructor_dashboard', kwargs={'course_id': course.id})
         response = self.client.post(url, {'action': 'Enroll multiple students', 'multiple_students': 'student1_1@test.com, student1_2@test.com', 'auto_enroll': 'on'})
 
@@ -120,7 +119,6 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
         user = User.objects.get(email='student1_2@test.com')
         ce = CourseEnrollment.objects.filter(course_id=course.id, user=user)
         self.assertEqual(1, len(ce))
-
 
     def test_enrollmemt_new_student_autoenroll_off_email_off(self):
         '''
@@ -172,7 +170,6 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
         ce = CourseEnrollment.objects.filter(course_id=course.id, user=user)
         self.assertEqual(0, len(ce))
 
-
     def test_get_and_clean_student_list(self):
         '''
         Clean user input test
@@ -182,25 +179,24 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
         cleaned_string, cleaned_string_lc = get_and_clean_student_list(string)
         self.assertEqual(cleaned_string, ['abc@test.com', 'def@test.com', 'ghi@test.com', 'jkl@test.com', 'mno@test.com'])
 
-
     def test_enrollment_email_on(self):
         '''
         Do email on enroll test
         '''
- 
+
         # Empty the test outbox
         mail.outbox = []
- 
+
         course = self.course
- 
+
         url = reverse('instructor_dashboard', kwargs={'course_id': course.id})
-        response = self.client.post(url, {'action': 'Enroll multiple students', 'multiple_students': 'student3_1@test.com, student3_2@test.com', 'auto_enroll': 'on', 'email_students': 'on'})        
- 
+        response = self.client.post(url, {'action': 'Enroll multiple students', 'multiple_students': 'student3_1@test.com, student3_2@test.com', 'auto_enroll': 'on', 'email_students': 'on'})
+
         #Check the page output
         self.assertContains(response, '<td>student3_1@test.com</td>')
         self.assertContains(response, '<td>student3_2@test.com</td>')
         self.assertContains(response, '<td>user does not exist, enrollment allowed, pending with auto enrollment on, email sent</td>')
- 
+
         #Check the outbox
         self.assertEqual(mail.outbox[0].subject, 'You have been invited to register for MITx/999/Robot_Super_Course')
         self.assertEqual(len(mail.outbox), 2)
@@ -216,7 +212,7 @@ class TestInstructorEnrollsStudent(ModuleStoreTestCase, LoginEnrollmentTestCase)
         course = self.course
 
         url = reverse('instructor_dashboard', kwargs={'course_id': course.id})
-        response = self.client.post(url, {'action': 'Unenroll multiple students', 'multiple_students': 'student2@test.com, student3@test.com', 'email_students': 'on'})        
+        response = self.client.post(url, {'action': 'Unenroll multiple students', 'multiple_students': 'student2@test.com, student3@test.com', 'email_students': 'on'})
 
         #Check the page output
         self.assertContains(response, '<td>student2@test.com</td>')
