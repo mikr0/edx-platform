@@ -115,7 +115,6 @@ class TestRescoringTask(TestIntegrationTask):
             self.assertTrue('student_answers' in state)
             self.assertGreater(len(state['correct_map']), 0)
             self.assertGreater(len(state['student_answers']), 0)
-            self.assertEquals(len(state['student_answers']), len(state['correct_map']))
 
     def submit_rescore_all_student_answers(self, instructor, problem_url_name):
         """Submits the particular problem for rescoring"""
@@ -403,7 +402,7 @@ class TestResetAttemptsTask(TestIntegrationTask):
         self.assertEqual(instructor_task.task_type, 'reset_problem_attempts')
         task_input = json.loads(instructor_task.task_input)
         self.assertFalse('student' in task_input)
-        self.assertEqual(task_input['problem_url'], TestRescoringTask.problem_location(problem_url_name))
+        self.assertEqual(task_input['problem_url'], InstructorTaskTestCase.problem_location(problem_url_name))
         status = json.loads(instructor_task.task_output)
         self.assertEqual(status['exception'], 'ZeroDivisionError')
         self.assertEqual(status['message'], expected_message)
@@ -484,7 +483,7 @@ class TestDeleteProblemTask(TestIntegrationTask):
         self.assertEqual(instructor_task.task_type, 'delete_problem_state')
         task_input = json.loads(instructor_task.task_input)
         self.assertFalse('student' in task_input)
-        self.assertEqual(task_input['problem_url'], TestRescoringTask.problem_location(problem_url_name))
+        self.assertEqual(task_input['problem_url'], InstructorTaskTestCase.problem_location(problem_url_name))
         status = json.loads(instructor_task.task_output)
         self.assertEqual(status['exception'], 'ZeroDivisionError')
         self.assertEqual(status['message'], expected_message)
