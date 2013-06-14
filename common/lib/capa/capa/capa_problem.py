@@ -15,11 +15,8 @@ This is used by capa_module.
 
 from datetime import datetime
 import logging
-import math
-import numpy
 import os.path
 import re
-import sys
 
 from lxml import etree
 from xml.sax.saxutils import unescape

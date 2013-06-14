@@ -3,7 +3,6 @@ import unittest
 from mock import Mock
 
 from xmodule.html_module import HtmlModule
-from xmodule.modulestore import Location
 
 from . import test_system
 

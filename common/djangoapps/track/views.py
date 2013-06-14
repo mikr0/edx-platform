@@ -1,13 +1,11 @@
 import json
 import logging
-import os
 import pytz
 import datetime
 import dateutil.parser
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.http import Http404
 from django.shortcuts import redirect
 from django.conf import settings
 from mitxmako.shortcuts import render_to_response

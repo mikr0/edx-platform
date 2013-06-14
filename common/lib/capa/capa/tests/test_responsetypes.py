@@ -4,7 +4,6 @@ Tests of responsetypes
 
 from datetime import datetime
 import json
-from nose.plugins.skip import SkipTest
 import os
 import random
 import unittest
