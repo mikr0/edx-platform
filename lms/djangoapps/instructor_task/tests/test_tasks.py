@@ -10,15 +10,9 @@ import json
 from uuid import uuid4
 
 from mock import Mock, patch
-import textwrap
 
 from celery.states import SUCCESS, FAILURE
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 
-from capa.tests.response_xml_factory import (CodeResponseXMLFactory,
-                                             CustomResponseXMLFactory)
-from xmodule.modulestore.tests.factories import ItemFactory
 from xmodule.modulestore.exceptions import ItemNotFoundError
 
 from courseware.model_data import StudentModule
@@ -241,7 +235,7 @@ class TestInstructorTasks(InstructorTaskTestCase):
     def test_delete_with_failure(self):
         self._test_run_with_failure(delete_problem_state, 'We expected this to fail')
 
-    def _test_run_with_toolong_failure(self, task_class):
+    def _test_run_with_long_error_msg(self, task_class):
         # run with no StudentModules for the problem
         task_entry = self._create_input_entry()
         self.define_option_problem(PROBLEM_URL_NAME)
@@ -260,5 +254,5 @@ class TestInstructorTasks(InstructorTaskTestCase):
         self.assertEquals(output['exception'], 'TestTaskFailure')
         self.assertEquals(output['message'], expected_message)
 
-    def test_rescore_with_toolong_failure(self):
-        self._test_run_with_toolong_failure(rescore_problem)
+    def test_rescore_with_long_error_msg(self):
+        self._test_run_with_long_error_msg(rescore_problem)
