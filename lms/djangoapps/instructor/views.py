@@ -541,7 +541,7 @@ def instructor_dashboard(request, course_id):
         students = request.POST.get('multiple_students', '')
         auto_enroll = bool(request.POST.get('auto_enroll'))
         email_students = bool(request.POST.get('email_students'))
-        ret = _do_enroll_students(course, course_id, students, auto_enroll=auto_enroll, email_students=email_students)
+        ret = _do_enroll_students(course, course_id, students, request, auto_enroll=auto_enroll, email_students=email_students)
         datatable = ret['datatable']
 
     elif action == 'Unenroll multiple students':
@@ -965,7 +965,7 @@ def grade_summary(request, course_id):
 #-----------------------------------------------------------------------------
 # enrollment
 
-def _do_enroll_students(course, course_id, students, overload=False, auto_enroll=False, email_students=False):
+def _do_enroll_students(course, course_id, students, request, overload=False, auto_enroll=False, email_students=False):
     """Do the actual work of enrolling multiple students, presented as a string
     of emails separated by commas or returns"""
 
@@ -988,7 +988,7 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
     if email_students:
         
         # @todo Figure out how to get the base url 
-        registration_url = reverse('student.views.create_account')
+        registration_url = 'https://' + str(request.META.get('HTTP_HOST')) + reverse('student.views.register_user')
         #Compose email
         d = {'site_name': settings.SITE_NAME,
              'registration_url': registration_url,
@@ -997,8 +997,8 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
              'course_url': registration_url + '/courses/' + course_id,
              }
         
-        allowed_subject = render_to_string('emails/autoenroll_email_allowedsubject.txt', d)
-        enrolled_subject = render_to_string('emails/autoenroll_email_enrolledsubject.txt', d)
+        allowed_subject = render_to_string('emails/enroll_email_allowedsubject.txt', d)
+        enrolled_subject = render_to_string('emails/enroll_email_enrolledsubject.txt', d)
         # Email subject *must not* contain newlines
         allowed_subject = ''.join(allowed_subject.splitlines())
         enrolled_subject = ''.join(enrolled_subject.splitlines())
@@ -1030,7 +1030,7 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
             if email_students:
                 #User is allowed to enroll but has not signed up yet
                 d['email_address'] = student
-                allowed_message = render_to_string('emails/autoenroll_email_allowedmessage.txt', d)
+                allowed_message = render_to_string('emails/enroll_email_allowedmessage.txt', d)
                 send_mail(allowed_subject, allowed_message, settings.DEFAULT_FROM_EMAIL, [student], fail_silently=False)
             continue
 
@@ -1050,7 +1050,7 @@ def _do_enroll_students(course, course_id, students, overload=False, auto_enroll
                 d['email_address'] = student
                 d['first_name'] = user.first_name
                 d['last_name'] = user.last_name
-                enrolled_message = render_to_string('emails/autoenroll_email_enrolledmessage.txt', d)
+                enrolled_message = render_to_string('emails/enroll_email_enrolledmessage.txt', d)
                 send_mail(enrolled_subject, enrolled_message, settings.DEFAULT_FROM_EMAIL, [student], fail_silently=False)
 
         except:
