@@ -720,6 +720,14 @@ body.course.unit {
     }
   }
 }
+// Settings Wrapper
+.wrapper-comp-subtitles {
+  display: none;
+
+  &.is-active {
+    display: block;
+  }
+}
 // ====================
 
 // Editing Units from Courseware

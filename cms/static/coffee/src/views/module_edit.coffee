@@ -2,6 +2,8 @@ class CMS.Views.ModuleEdit extends Backbone.View
   tagName: 'li'
   className: 'component'
   editorMode: 'editor-mode'
+  settingsMode: 'settings-mode'
+  subtitlesMode: 'subtitles-mode'
 
   events:
     "click .component-editor .cancel-button": 'clickCancelButton'
@@ -26,7 +28,9 @@ class CMS.Views.ModuleEdit extends Backbone.View
       metadataEditor = @$el.find('.metadata_edit')
       metadataData = metadataEditor.data('metadata')
       models = [];
+      console.log 'Iterating metadata'
       for key of metadataData
+        console.log key
         models.push(metadataData[key])
       @metadataEditor = new CMS.Views.Metadata.Editor({
           el: metadataEditor,
@@ -60,7 +64,7 @@ class CMS.Views.ModuleEdit extends Backbone.View
     $.post("/clone_item", {
       parent_location: parent
       template: template
-    }, (data) => 
+    }, (data) =>
       @model.set(id: data.id)
       @$el.data('id', data.id)
       @render()
@@ -121,8 +125,10 @@ class CMS.Views.ModuleEdit extends Backbone.View
   selectMode: (mode) =>
     dataEditor = @$el.find('.wrapper-comp-editor')
     settingsEditor = @$el.find('.wrapper-comp-settings')
+    subtitlesEditor = @$el.find('.wrapper-comp-subtitles')
     editorModeButton =  @$el.find('#editor-mode').find("a")
     settingsModeButton = @$el.find('#settings-mode').find("a")
+    subtitlesModeButton = @$el.find('#subtitles-mode').find("a")
 
     if mode == @editorMode
       # Because of CodeMirror editor, cannot hide the data editor when it is first loaded. Therefore
@@ -131,11 +137,24 @@ class CMS.Views.ModuleEdit extends Backbone.View
       editorModeButton.addClass('is-set')
       settingsEditor.removeClass('is-active')
       settingsModeButton.removeClass('is-set')
-    else
+      subtitlesEditor.removeClass('is-active')
+      subtitlesModeButton.removeClass('is-set')
+    else if mode == @settingsMode
       dataEditor.addClass('is-inactive')
       editorModeButton.removeClass('is-set')
       settingsEditor.addClass('is-active')
       settingsModeButton.addClass('is-set')
+      subtitlesEditor.removeClass('is-active')
+      subtitlesModeButton.removeClass('is-set')
+    else
+      dataEditor.addClass('is-inactive')
+      editorModeButton.removeClass('is-set')
+      settingsEditor.removeClass('is-active')
+      settingsModeButton.removeClass('is-set')
+      subtitlesEditor.addClass('is-active')
+      subtitlesModeButton.addClass('is-set')
+
+
 
   hideDataEditor: =>
     editorModeButtonParent =  @$el.find('#editor-mode')
