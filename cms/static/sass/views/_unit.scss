@@ -727,6 +727,26 @@ body.course.unit {
   &.is-active {
     display: block;
   }
+
+  .comp-subtitles-entry{
+    background: white;
+    padding: 20px;
+
+    .green-button{
+      @include orange-button;
+      display: block;
+      width: 70%;
+      margin: 0 auto;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    > li{
+      display: block;
+      margin: $baseline/2 0px $baseline/2 0;
+    }
+
+  }
 }
 // ====================
 

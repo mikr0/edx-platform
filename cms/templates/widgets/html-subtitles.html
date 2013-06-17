@@ -1,10 +1,14 @@
 <%! from django.utils.translation import ugettext as _ %>
 
 <div class="wrapper-comp-subtitles" id="subtitles-tab">
-    <div class="row module-actions">
-        <a href="#" class="save-button">${_("Save")}</a>
-        <a href="#" class="cancel-button">${_("Cancel")}</a>
-    </div> <!-- Module Actions-->
+    <ul class="field comp-subtitles-entry">
+        <li>
+            <a href="#" class="orange-button ">${_("Upload from file")}</a>
+        </li>
+        <li>
+            <a href="#" class="orange-button">${_("Import from Youtube")}</a>
+        </li>
+    </ul>
 </div>
 
 <%include file="raw-edit.html" />
