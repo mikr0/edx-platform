@@ -1,14 +1,14 @@
 """
-Integration Test for LMS instructor-initiated background tasks
-
-Runs tasks on answers to course problems to validate that code
-paths actually work.
+Base test classes for LMS instructor-initiated background tasks
 
 """
-import logging
 import json
+from uuid import uuid4
 from mock import Mock
 
+from celery.states import SUCCESS, FAILURE
+
+from django.test.testcases import TestCase
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
@@ -21,23 +21,82 @@ from student.tests.factories import CourseEnrollmentFactory, UserFactory
 from courseware.model_data import StudentModule
 from courseware.tests.tests import LoginEnrollmentTestCase, TEST_DATA_MONGO_MODULESTORE
 
+from instructor_task.api_helper import encode_problem_and_student_input
+from instructor_task.models import PROGRESS, QUEUING
+from instructor_task.tests.factories import InstructorTaskFactory
 from instructor_task.views import instructor_task_status
-
-
-log = logging.getLogger(__name__)
 
 
 TEST_COURSE_ORG = 'edx'
 TEST_COURSE_NAME = 'Test Course'
 TEST_COURSE_NUMBER = '1.23x'
 TEST_SECTION_NAME = "Problem"
+TEST_COURSE_ID = 'edx/1.23x/test_course'
+
+TEST_FAILURE_MESSAGE = 'task failed horribly'
+TEST_FAILURE_EXCEPTION = 'RandomCauseError'
+
+
+class InstructorTaskTestCase(TestCase):
+    """
+    Tests API and view methods that involve the reporting of status for background tasks.
+    """
+    def setUp(self):
+        self.student = UserFactory.create(username="student", email="student@edx.org")
+        self.instructor = UserFactory.create(username="instructor", email="instructor@edx.org")
+        self.problem_url = InstructorTaskTestCase.problem_location("test_urlname")
+
+    @staticmethod
+    def problem_location(problem_url_name):
+        """
+        Create an internal location for a test problem.
+        """
+        return "i4x://{org}/{number}/problem/{problem_url_name}".format(org='edx',
+                                                                        number='1.23x',
+                                                                        problem_url_name=problem_url_name)
+
+    def _create_entry(self, task_state=QUEUING, task_output=None, student=None):
+        """Creates a InstructorTask entry for testing."""
+        task_id = str(uuid4())
+        progress_json = json.dumps(task_output) if task_output is not None else None
+        task_input, task_key = encode_problem_and_student_input(self.problem_url, student)
+
+        instructor_task = InstructorTaskFactory.create(course_id=TEST_COURSE_ID,
+                                                       requester=self.instructor,
+                                                       task_input=json.dumps(task_input),
+                                                       task_key=task_key,
+                                                       task_id=task_id,
+                                                       task_state=task_state,
+                                                       task_output=progress_json)
+        return instructor_task
+
+    def _create_failure_entry(self):
+        """Creates a InstructorTask entry representing a failed task."""
+        # view task entry for task failure
+        progress = {'message': TEST_FAILURE_MESSAGE,
+                    'exception': TEST_FAILURE_EXCEPTION,
+                    }
+        return self._create_entry(task_state=FAILURE, task_output=progress)
+
+    def _create_success_entry(self, student=None):
+        """Creates a InstructorTask entry representing a successful task."""
+        return self._create_progress_entry(student, task_state=SUCCESS)
+
+    def _create_progress_entry(self, student=None, task_state=PROGRESS):
+        """Creates a InstructorTask entry representing a task in progress."""
+        progress = {'attempted': 3,
+                    'updated': 2,
+                    'total': 5,
+                    'action_name': 'rescored',
+                    }
+        return self._create_entry(task_state=task_state, task_output=progress, student=student)
 
 
 @override_settings(MODULESTORE=TEST_DATA_MONGO_MODULESTORE)
-class InstructorTaskTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase):
+class InstructorTaskModuleTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase):
     """
     Base test class for InstructorTask-related tests that require
-    the setup of a course and problem.
+    the setup of a course and problem in order to access StudentModule state.
     """
     course = None
     current_user = None
@@ -68,14 +127,13 @@ class InstructorTaskTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase):
     def login_username(self, username):
         """Login the user, given the `username`."""
         if self.current_user != username:
-            self.login(InstructorTaskTestCase.get_user_email(username), "test")
+            self.login(InstructorTaskModuleTestCase.get_user_email(username), "test")
             self.current_user = username
 
     def _create_user(self, username, is_staff=False):
         """Creates a user and enrolls them in the test course."""
-        email = InstructorTaskTestCase.get_user_email(username)
-        UserFactory.create(username=username, email=email, is_staff=is_staff)
-        thisuser = User.objects.get(username=username)
+        email = InstructorTaskModuleTestCase.get_user_email(username)
+        thisuser = UserFactory.create(username=username, email=email, is_staff=is_staff)
         CourseEnrollmentFactory.create(user=thisuser, course_id=self.course.id)
         return thisuser
 

@@ -20,7 +20,7 @@ from courseware.tests.factories import StudentModuleFactory
 from student.tests.factories import UserFactory
 
 from instructor_task.models import InstructorTask
-from instructor_task.tests.test_base import InstructorTaskTestCase, TEST_COURSE_ORG, TEST_COURSE_NUMBER
+from instructor_task.tests.test_base import InstructorTaskModuleTestCase, TEST_COURSE_ORG, TEST_COURSE_NUMBER
 from instructor_task.tests.factories import InstructorTaskFactory
 from instructor_task.tasks import rescore_problem, reset_problem_attempts, delete_problem_state
 from instructor_task.tasks_helper import UpdateProblemModuleStateError
@@ -34,12 +34,12 @@ class TestTaskFailure(Exception):
     pass
 
 
-class TestInstructorTasks(InstructorTaskTestCase):
+class TestInstructorTasks(InstructorTaskModuleTestCase):
     def setUp(self):
-        super(InstructorTaskTestCase, self).setUp()
+        super(InstructorTaskModuleTestCase, self).setUp()
         self.initialize_course()
         self.instructor = self.create_instructor('instructor')
-        self.problem_url = InstructorTaskTestCase.problem_location(PROBLEM_URL_NAME)
+        self.problem_url = InstructorTaskModuleTestCase.problem_location(PROBLEM_URL_NAME)
 
     def _create_input_entry(self, student_ident=None):
         """Creates a InstructorTask entry for testing."""

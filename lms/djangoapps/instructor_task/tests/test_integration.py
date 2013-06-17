@@ -26,14 +26,14 @@ from instructor_task.api import (submit_rescore_problem_for_all_students,
                                  submit_reset_problem_attempts_for_all_students,
                                  submit_delete_problem_state_for_all_students)
 from instructor_task.models import InstructorTask
-from instructor_task.tests.test_base import InstructorTaskTestCase, TEST_COURSE_ORG, TEST_COURSE_NUMBER
+from instructor_task.tests.test_base import InstructorTaskModuleTestCase, TEST_COURSE_ORG, TEST_COURSE_NUMBER
 from capa.responsetypes import StudentInputError
 
 
 log = logging.getLogger(__name__)
 
 
-class TestIntegrationTask(InstructorTaskTestCase):
+class TestIntegrationTask(InstructorTaskModuleTestCase):
     """
     Base class to provide general methods used for "integration" testing of particular tasks.
     """
@@ -56,7 +56,7 @@ class TestIntegrationTask(InstructorTaskTestCase):
         # make ajax call:
         modx_url = reverse('modx_dispatch',
                            kwargs={'course_id': self.course.id,
-                                   'location': InstructorTaskTestCase.problem_location(problem_url_name),
+                                   'location': InstructorTaskModuleTestCase.problem_location(problem_url_name),
                                    'dispatch': 'problem_check', })
 
         resp = self.client.post(modx_url, {
@@ -92,7 +92,7 @@ class TestRescoringTask(TestIntegrationTask):
         # make ajax call:
         modx_url = reverse('modx_dispatch',
                            kwargs={'course_id': self.course.id,
-                                   'location': InstructorTaskTestCase.problem_location(problem_url_name),
+                                   'location': InstructorTaskModuleTestCase.problem_location(problem_url_name),
                                    'dispatch': 'problem_get', })
         resp = self.client.post(modx_url, {})
         return resp
@@ -120,25 +120,25 @@ class TestRescoringTask(TestIntegrationTask):
     def submit_rescore_all_student_answers(self, instructor, problem_url_name):
         """Submits the particular problem for rescoring"""
         return submit_rescore_problem_for_all_students(self.create_task_request(instructor), self.course.id,
-                                                       InstructorTaskTestCase.problem_location(problem_url_name))
+                                                       InstructorTaskModuleTestCase.problem_location(problem_url_name))
 
     def submit_rescore_one_student_answer(self, instructor, problem_url_name, student):
         """Submits the particular problem for rescoring for a particular student"""
         return submit_rescore_problem_for_student(self.create_task_request(instructor), self.course.id,
-                                                  InstructorTaskTestCase.problem_location(problem_url_name),
+                                                  InstructorTaskModuleTestCase.problem_location(problem_url_name),
                                                   student)
 
     def rescore_all_student_answers(self, instructor, problem_url_name):
         """Runs the task to rescore the current problem"""
         return submit_rescore_problem_for_all_students(self.create_task_request(instructor), self.course.id,
-                                                       InstructorTaskTestCase.problem_location(problem_url_name))
+                                                       InstructorTaskModuleTestCase.problem_location(problem_url_name))
 
     def test_rescoring_option_problem(self):
         '''Run rescore scenario on option problem'''
         # get descriptor:
         problem_url_name = 'H1P1'
         self.define_option_problem(problem_url_name)
-        location = InstructorTaskTestCase.problem_location(problem_url_name)
+        location = InstructorTaskModuleTestCase.problem_location(problem_url_name)
         descriptor = self.module_store.get_instance(self.course.id, location)
 
         # first store answers for each of the separate users:
@@ -191,7 +191,7 @@ class TestRescoringTask(TestIntegrationTask):
         self.assertEqual(instructor_task.task_type, 'rescore_problem')
         task_input = json.loads(instructor_task.task_input)
         self.assertFalse('student' in task_input)
-        self.assertEqual(task_input['problem_url'], InstructorTaskTestCase.problem_location(problem_url_name))
+        self.assertEqual(task_input['problem_url'], InstructorTaskModuleTestCase.problem_location(problem_url_name))
         status = json.loads(instructor_task.task_output)
         self.assertEqual(status['exception'], 'ZeroDivisionError')
         self.assertEqual(status['message'], expected_message)
@@ -224,7 +224,7 @@ class TestRescoringTask(TestIntegrationTask):
         self.assertEqual(instructor_task.task_type, 'rescore_problem')
         task_input = json.loads(instructor_task.task_input)
         self.assertFalse('student' in task_input)
-        self.assertEqual(task_input['problem_url'], InstructorTaskTestCase.problem_location(problem_url_name))
+        self.assertEqual(task_input['problem_url'], InstructorTaskModuleTestCase.problem_location(problem_url_name))
         status = json.loads(instructor_task.task_output)
         self.assertEqual(status['attempted'], 1)
         self.assertEqual(status['updated'], 0)
@@ -304,7 +304,7 @@ class TestRescoringTask(TestIntegrationTask):
             """)
         problem_xml = factory.build_xml(script=script, cfn="check_func", expect="42", num_responses=1)
         if redefine:
-            self.module_store.update_item(InstructorTaskTestCase.problem_location(problem_url_name), problem_xml)
+            self.module_store.update_item(InstructorTaskModuleTestCase.problem_location(problem_url_name), problem_xml)
         else:
             # Use "per-student" rerandomization so that check-problem can be called more than once.
             # Using "always" means we cannot check a problem twice, but we want to call once to get the
@@ -322,7 +322,7 @@ class TestRescoringTask(TestIntegrationTask):
         # First define the custom response problem:
         problem_url_name = 'H1P1'
         self.define_randomized_custom_response_problem(problem_url_name)
-        location = InstructorTaskTestCase.problem_location(problem_url_name)
+        location = InstructorTaskModuleTestCase.problem_location(problem_url_name)
         descriptor = self.module_store.get_instance(self.course.id, location)
         # run with more than one user
         userlist = ['u1', 'u2', 'u3', 'u4']
@@ -392,14 +392,14 @@ class TestResetAttemptsTask(TestIntegrationTask):
     def reset_problem_attempts(self, instructor, problem_url_name):
         """Submits the current problem for resetting"""
         return submit_reset_problem_attempts_for_all_students(self.create_task_request(instructor), self.course.id,
-                                                              InstructorTaskTestCase.problem_location(problem_url_name))
+                                                              InstructorTaskModuleTestCase.problem_location(problem_url_name))
 
     def test_reset_attempts_on_problem(self):
         '''Run reset-attempts scenario on option problem'''
         # get descriptor:
         problem_url_name = 'H1P1'
         self.define_option_problem(problem_url_name)
-        location = InstructorTaskTestCase.problem_location(problem_url_name)
+        location = InstructorTaskModuleTestCase.problem_location(problem_url_name)
         descriptor = self.module_store.get_instance(self.course.id, location)
         num_attempts = 3
         # first store answers for each of the separate users:
@@ -433,7 +433,7 @@ class TestResetAttemptsTask(TestIntegrationTask):
         self.assertEqual(instructor_task.task_type, 'reset_problem_attempts')
         task_input = json.loads(instructor_task.task_input)
         self.assertFalse('student' in task_input)
-        self.assertEqual(task_input['problem_url'], InstructorTaskTestCase.problem_location(problem_url_name))
+        self.assertEqual(task_input['problem_url'], InstructorTaskModuleTestCase.problem_location(problem_url_name))
         status = json.loads(instructor_task.task_output)
         self.assertEqual(status['exception'], 'ZeroDivisionError')
         self.assertEqual(status['message'], expected_message)
@@ -474,14 +474,14 @@ class TestDeleteProblemTask(TestIntegrationTask):
     def delete_problem_state(self, instructor, problem_url_name):
         """Submits the current problem for deletion"""
         return submit_delete_problem_state_for_all_students(self.create_task_request(instructor), self.course.id,
-                                                            InstructorTaskTestCase.problem_location(problem_url_name))
+                                                            InstructorTaskModuleTestCase.problem_location(problem_url_name))
 
     def test_delete_problem_state(self):
         '''Run delete-state scenario on option problem'''
         # get descriptor:
         problem_url_name = 'H1P1'
         self.define_option_problem(problem_url_name)
-        location = InstructorTaskTestCase.problem_location(problem_url_name)
+        location = InstructorTaskModuleTestCase.problem_location(problem_url_name)
         descriptor = self.module_store.get_instance(self.course.id, location)
         # first store answers for each of the separate users:
         for username in self.userlist:
@@ -514,7 +514,7 @@ class TestDeleteProblemTask(TestIntegrationTask):
         self.assertEqual(instructor_task.task_type, 'delete_problem_state')
         task_input = json.loads(instructor_task.task_input)
         self.assertFalse('student' in task_input)
-        self.assertEqual(task_input['problem_url'], InstructorTaskTestCase.problem_location(problem_url_name))
+        self.assertEqual(task_input['problem_url'], InstructorTaskModuleTestCase.problem_location(problem_url_name))
         status = json.loads(instructor_task.task_output)
         self.assertEqual(status['exception'], 'ZeroDivisionError')
         self.assertEqual(status['message'], expected_message)
