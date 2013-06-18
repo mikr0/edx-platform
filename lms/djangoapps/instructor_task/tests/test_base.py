@@ -36,6 +36,9 @@ TEST_COURSE_ID = 'edx/1.23x/test_course'
 TEST_FAILURE_MESSAGE = 'task failed horribly'
 TEST_FAILURE_EXCEPTION = 'RandomCauseError'
 
+OPTION_1 = 'Option 1'
+OPTION_2 = 'Option 2'
+
 
 class InstructorTaskTestCase(TestCase):
     """
@@ -160,9 +163,9 @@ class InstructorTaskModuleTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase)
     def define_option_problem(self, problem_url_name):
         """Create the problem definition so the answer is Option 1"""
         factory = OptionResponseXMLFactory()
-        factory_args = {'question_text': 'The correct answer is Option 1',
-                        'options': ['Option 1', 'Option 2'],
-                        'correct_option': 'Option 1',
+        factory_args = {'question_text': 'The correct answer is {0}'.format(OPTION_1),
+                        'options': [OPTION_1, OPTION_2],
+                        'correct_option': OPTION_1,
                         'num_responses': 2}
         problem_xml = factory.build_xml(**factory_args)
         ItemFactory.create(parent_location=self.problem_section.location,
@@ -173,9 +176,9 @@ class InstructorTaskModuleTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase)
     def redefine_option_problem(self, problem_url_name):
         """Change the problem definition so the answer is Option 2"""
         factory = OptionResponseXMLFactory()
-        factory_args = {'question_text': 'The correct answer is Option 2',
-                        'options': ['Option 1', 'Option 2'],
-                        'correct_option': 'Option 2',
+        factory_args = {'question_text': 'The correct answer is {0}'.format(OPTION_2),
+                        'options': [OPTION_1, OPTION_2],
+                        'correct_option': OPTION_2,
                         'num_responses': 2}
         problem_xml = factory.build_xml(**factory_args)
         location = InstructorTaskTestCase.problem_location(problem_url_name)
@@ -189,7 +192,8 @@ class InstructorTaskModuleTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase)
                                          module_state_key=descriptor.location.url(),
                                          )
 
-    def get_task_status(self, task_id):
+    @staticmethod
+    def get_task_status(task_id):
         """Use api method to fetch task status, using mock request."""
         mock_request = Mock()
         mock_request.REQUEST = {'task_id': task_id}
